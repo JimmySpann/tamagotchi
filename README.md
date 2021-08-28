@@ -4,9 +4,7 @@
 
 # Wireframe
 
-![wireframe](/wireframe.png)
-
-Words
+![wireframe](wireframe.png)
 
 <br>
 <hr>
