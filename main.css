@@ -177,6 +177,7 @@ svg {
     height: 100px;
     background-color: blue;
     margin: 0 auto;
+    margin-top: 20px;
     padding: 10px;
     border-radius: 20px 20px 20px 20px;
     background: #0F2027;  /* fallback for old browsers */

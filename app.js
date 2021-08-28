@@ -25,6 +25,8 @@ function findElement(query, isMulti = false) {
 
 class HtmlElements {
 
+  startedWalking = false;
+
   ui = {
     stats: {
       time   : findElement('.time-stats'),
@@ -61,39 +63,47 @@ class HtmlElements {
 
 
   character = {
-    full : findElement('.character'     ),
-    head : findElement('.char-body'     ),
-    face : findElement('.char-body img' ),
+    full     : findElement('.character'      ),
+    head     : findElement('.char-body'      ),
+    face     : findElement('.char-body img'  ),
+    lowerBody: findElement('.legs'           ),
+    legs     : findElement('.legs line', true),
+    leftArm  : findElement('.left-arm'       ),
+    rightArm : findElement('.right-arm'      ),
+    arms     : [
+                 findElement('.left-arm line' ),
+                 findElement('.right-arm line')
+               ]
   }
 
   start() {
-    this.buttons.feed            .addEventListener('click', handleFeedClick           );
-    this.buttons.lightsOut       .addEventListener('click', handleLightsOutClick      );
-    this.buttons.play            .addEventListener('click', handlePlayClick           );
-    this.buttons.changeNameStart .addEventListener('click', handleChangeNameStartClick);
-    this.buttons.changeName      .addEventListener('click', handleChangeNameClick     );
-    this.buttons.toggleSpeed     .addEventListener('click', handleToggleSpeedClick    );
-    this.buttons.increaseAge     .addEventListener('click', handleIncreaseAgeClick    );
+    this.ui.buttons.feed            .addEventListener('click', handleFeedClick           );
+    this.ui.buttons.lightsOut       .addEventListener('click', handleLightsOutClick      );
+    this.ui.buttons.play            .addEventListener('click', handlePlayClick           );
+    this.ui.buttons.changeNameStart .addEventListener('click', handleChangeNameStartClick);
+    this.ui.buttons.changeName      .addEventListener('click', handleChangeNameClick     );
+    this.ui.buttons.toggleSpeed     .addEventListener('click', handleToggleSpeedClick    );
+    this.ui.buttons.increaseAge     .addEventListener('click', handleIncreaseAgeClick    );
     this.update();
   }
 
   //Maybe create a timer to control this
   update() {
     let stats = this.ui.stats;
+console.log(tomagatchi)
     stats.time.innerHTML      = `Time:       ${time}s<br>` +
                                 `Age:        ${tomagatchi.age}<br>`;
-
     stats.name            = tomagatchi.name;
-    stats.hunger.bar      = (tomagatchi.hunger*10)+"%";
-    stats.hunger.text     = tomagatchi.hunger;
-    stats.sleepiness.text = (tomagatchi.sleepiness*10)+"%";
-    stats.sleepiness.text = tomagatchi.sleepiness;
-    stats.boredom.text    = (tomagatchi.boredom*10)+"%";
-    stats.boredom.text    = tomagatchi.boredom;
+    stats.hunger.bar.style.width      = (tomagatchi.hunger*10)+"%";
+    stats.hunger.text.textContent     = tomagatchi.hunger;
+    stats.sleepiness.bar.style.width  = (tomagatchi.sleepiness*10)+"%";
+    stats.sleepiness.text.textContent = tomagatchi.sleepiness;
+    stats.boredom.bar.style.width     = (tomagatchi.boredom*10)+"%";
+    stats.boredom.text.textContent    = tomagatchi.boredom;
     this.updateFace();
     this.morph();
   }
-
+  
   updateFace() {
     
     //Discover the LowestStats
@@ -110,26 +120,26 @@ class HtmlElements {
 
     //Choose Message Based On LowestStat
     if(gameStatus === 'normal') {
-      (lowestStat >= 8) ? this.ui.stats.briefing.textContent = `${tomagatchi.name}: "Thank you for taking care of me!"`:
-      (lowestStat >= 6) ? this.ui.stats.briefing.textContent = `${tomagatchi.name}: "You're great!"`                   :
-      (lowestStat >= 3) ? this.ui.stats.briefing.textContent = `${tomagatchi.name}: "I don't feel too good..."`        :
-      (lowestStat >  0) ? this.ui.stats.briefing.textContent = `${tomagatchi.name}: "Please save me!"`                 :
-        /* Else */() => {          
-                          this.ui.stats.briefing.textContent = `${tomagatchi.name} has died...`;
-                          gameStatus = 'dead';
-                          this.character.full.classList.add('dead');
-                          clearInterval(timerWalk); clearInterval(timer); 
-                        }
+      if      (lowestStat >= 8) { this.ui.briefing.textContent = `${tomagatchi.name}: "Thank you for taking care of me!"`}
+      else if (lowestStat >= 6) { this.ui.briefing.textContent = `${tomagatchi.name}: "You're great!"`                   }
+      else if (lowestStat >= 3) { this.ui.briefing.textContent = `${tomagatchi.name}: "I don't feel too good..."`        }
+      else if (lowestStat >  0) { this.ui.briefing.textContent = `${tomagatchi.name}: "Please save me!"`                 }
+      else    {          
+                this.ui.briefing.textContent = `${tomagatchi.name} has died...`;
+                gameStatus = 'dead';
+                this.character.full.style = '';
+                this.character.full.classList.add('dead');
+                clearInterval(timerWalk); clearInterval(timer); 
+              }
 
     }
-
   }
   morph() {
     if(tomagatchi.age <= 0) {
-      this.charBody.classList.add('egg');
-      findElement('.right-arm').classList.add('no-arm');
-      findElement('.left-arm' ).classList.add('no-arm');
-      findElement('.legs'     ).classList.add('no-legs');
+      this.character.head.classList.add('egg');
+      this.character.leftArm.classList.add('no-arm');
+      this.character.rightArm.classList.add('no-arm');
+      findElement('.legs').classList.add('no-legs');
       this.character.face.style.opacity = 0;
     } else if(tomagatchi.age === 1) {
       this.character.head.classList.remove('egg');
@@ -146,15 +156,19 @@ class HtmlElements {
       findElement('.legs').classList.remove('no-legs');
     }
     else if (tomagatchi.age === 5) {
-      if(!id){
-        timerWalk = setInterval(frame, 10);
-       walk(legs, arms);
+      if(!this.startedWalking){
+        timerWalk = setInterval(walk, 10);
+        // let walkAnim = setInterval(timeTick, 10);
+        walk()
+        this.startedWalking = true
+        console.log(this.character.arms)
+        moveLegs(this.character.legs, this.character.arms)
       }
     }
   }
 }
 
-//#region Animation
+// #region Animation
 function munipLine(element, x1, y1, x2, y2) {
     if(x1) element.setAttribute('x1',x1);
     if(y1) element.setAttribute('y1',y1);
@@ -162,34 +176,34 @@ function munipLine(element, x1, y1, x2, y2) {
     if(y2) element.setAttribute('y2',y2);
 }
 
-//Declare variables
+// Declare variables
 let character = findElement(".character"      ),
     legs      = findElement(".legs line", true),
     arms      = findElement("line", true      ),
     timerWalk,  pos = 250,  goRight = true;
 
 function walk() {
-    if (goRight) {
-        if (pos === 550) {
-          goRight = false;
-          character.style.transform = "scaleX(-1)"
-        }
-        pos++;
-      } else {
-        if (pos === 0) {
-          goRight = true;
-          character.style.transform = "scaleX(1)"
-        }
-        pos--;
-      }
-      character.style.left = pos+"px";
+  if (goRight) {
+    if (pos === 550) {
+      goRight = false;
+      character.style.transform = "scaleX(-1)"
+    }
+    pos++;
+  } else {
+    if (pos === 0) {
+      goRight = true;
+      character.style.transform = "scaleX(1)"
+    }
+    pos--;
+  }
+  character.style.left = pos+"px";
 }
 let body = findElement(".char-body");
 
-function moveLegs(legs, arms){
-    let walkAnim = setInterval(frame, 10);
+function moveLegs(legs){
+    let walkAnim = setInterval(timeTick, 10);
     let rightPos = 120, leftPos = 0, goRight = false;
-    function frame() {
+    function timeTick() {
         if (goRight) {
             if (rightPos === 120) {
               goRight = false;
@@ -207,7 +221,6 @@ function moveLegs(legs, arms){
           munipLine(legs[1],null,null,rightPos);
           munipLine(arms[0],null,null,(leftPos/2)+70);
           munipLine(arms[1],null,null,(rightPos+300)/2);
-          console.log(gameStatus)
           if(gameStatus === 'dead') clearInterval(walkAnim)
     }
 }
@@ -249,16 +262,16 @@ function handlePlayClick() {
   html.update();
 }
 function handleChangeNameStartClick() {
-  if(html.changeNameGroup.style.display === "block") html.changeNameGroup.style.display = "none";
+  if(html.ui.changeNameGroup.style.display === "block") html.ui.changeNameGroup.style.display = "none";
   else {
-    html.changeNameGroup.style.display = "block"; 
-    html.changeNameInput.focus();
+    html.ui.changeNameGroup.style.display = "block"; 
+    html.ui.changeNameInput.focus();
   }
 }
 function handleChangeNameClick() {
-  tomagatchi.name = html.changeNameInput.value;
-  html.changeNameInput.value = ""; 
-  html.changeNameGroup.style.display = "none";
+  tomagatchi.name = html.ui.changeNameInput.value;
+  html.ui.changeNameInput.value = ""; 
+  html.ui.changeNameGroup.style.display = "none";
   html.update();
 }
 function handleToggleSpeedClick() {
