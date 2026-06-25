@@ -112,11 +112,11 @@ console.log(tomagatchi)
     if(lowestStat > tomagatchi.boredom) lowestStat = tomagatchi.boredom
 
     //Choose Face Based On LowestStat
-    if     (lowestStat >= 8) this.character.face.src = "./faces/char-joy.png";
-    else if(lowestStat >= 6) this.character.face.src = "./faces/char-smile.png"; 
-    else if(lowestStat >= 3) this.character.face.src = "./faces/char-indifferent.png";
-    else if(lowestStat >  0) this.character.face.src = "./faces/char-sad.png"; 
-    else if(lowestStat <= 0) this.character.face.src = "./faces/char-dead.png"; 
+    if     (lowestStat >= 8) this.character.face.src = "./images/faces/char-joy.png";
+    else if(lowestStat >= 6) this.character.face.src = "./images/faces/char-smile.png"; 
+    else if(lowestStat >= 3) this.character.face.src = "./images/faces/char-indifferent.png";
+    else if(lowestStat >  0) this.character.face.src = "./images/faces/char-sad.png"; 
+    else if(lowestStat <= 0) this.character.face.src = "./images/faces/char-dead.png"; 
 
     //Choose Message Based On LowestStat
     if(gameStatus === 'normal') {
